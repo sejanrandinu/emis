@@ -8,9 +8,18 @@ CREATE TABLE IF NOT EXISTS classes (
 
 -- 2. Teachers Table
 CREATE TABLE IF NOT EXISTS teachers (
-    id TEXT PRIMARY KEY,
+    id TEXT PRIMARY KEY, -- acts as username
     name TEXT NOT NULL,
-    subject TEXT NOT NULL
+    subject TEXT NOT NULL,
+    passwordHash TEXT NOT NULL,
+    classId TEXT,
+    FOREIGN KEY (classId) REFERENCES classes(id)
+);
+
+-- 6. Principal Table
+CREATE TABLE IF NOT EXISTS principal (
+    username TEXT PRIMARY KEY,
+    passwordHash TEXT NOT NULL
 );
 
 -- 3. Students Table

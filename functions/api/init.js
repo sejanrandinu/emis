@@ -1,5 +1,14 @@
 // Cloudflare Pages D1 Database Seeder API Handler
 
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hash = await crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+}
+
 export async function onRequest(context) {
     const db = context.env.DB;
     if (!db) {
@@ -13,9 +22,9 @@ export async function onRequest(context) {
     }
 
     try {
-        // Check if DB is already seeded by counting classes
-        const classesCheck = await db.prepare("SELECT COUNT(*) as count FROM classes").first("count");
-        if (classesCheck > 0) {
+        // Check if DB is already seeded by counting principal accounts
+        const principalCheck = await db.prepare("SELECT COUNT(*) as count FROM principal").first("count");
+        if (principalCheck > 0) {
             return new Response(JSON.stringify({ success: true, message: "Database already seeded." }), {
                 headers: { 
                     "Content-Type": "application/json",
@@ -24,7 +33,23 @@ export async function onRequest(context) {
             });
         }
 
+        const hashAdmin = await hashPassword("admin");
+        const hashSilva = await hashPassword("silva123");
+        const hashPerera = await hashPassword("perera123");
+        const hashFernando = await hashPassword("fernando123");
+
         const statements = [
+            // Clear existing data to avoid foreign key / duplicate key constraint issues
+            db.prepare("DELETE FROM marks"),
+            db.prepare("DELETE FROM discipline"),
+            db.prepare("DELETE FROM students"),
+            db.prepare("DELETE FROM teachers"),
+            db.prepare("DELETE FROM principal"),
+            db.prepare("DELETE FROM classes"),
+
+            // Principal
+            db.prepare("INSERT INTO principal (username, passwordHash) VALUES ('admin', ?)").bind(hashAdmin),
+
             // Classes
             db.prepare("INSERT INTO classes (id, name) VALUES ('class_10a', 'Grade 10-A')"),
             db.prepare("INSERT INTO classes (id, name) VALUES ('class_10b', 'Grade 10-B')"),
@@ -33,9 +58,9 @@ export async function onRequest(context) {
             db.prepare("INSERT INTO classes (id, name) VALUES ('class_13c', 'Grade 13-Commerce')"),
 
             // Teachers
-            db.prepare("INSERT INTO teachers (id, name, subject) VALUES ('t_silva', 'Mr. A.B. Silva', 'Mathematics')"),
-            db.prepare("INSERT INTO teachers (id, name, subject) VALUES ('t_perera', 'Mrs. S. Perera', 'Science')"),
-            db.prepare("INSERT INTO teachers (id, name, subject) VALUES ('t_fernando', 'Mr. R. Fernando', 'English')"),
+            db.prepare("INSERT INTO teachers (id, name, subject, passwordHash) VALUES ('t_silva', 'Mr. A.B. Silva', 'Mathematics', ?)").bind(hashSilva),
+            db.prepare("INSERT INTO teachers (id, name, subject, passwordHash) VALUES ('t_perera', 'Mrs. S. Perera', 'Science', ?)").bind(hashPerera),
+            db.prepare("INSERT INTO teachers (id, name, subject, passwordHash) VALUES ('t_fernando', 'Mr. R. Fernando', 'English', ?)").bind(hashFernando),
 
             // Students
             db.prepare("INSERT INTO students (admissionNo, name, classId) VALUES ('1001', 'Nimal Silva', 'class_10a')"),

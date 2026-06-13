@@ -92,7 +92,18 @@ const TRANSLATIONS = {
         errInvalidScore: "Score must be an integer between 0 and 100.",
         errDuplicateClass: "A class with this name already exists.",
         errDuplicateStudent: "A student with this admission number already exists.",
-        errGeneric: "An error occurred. Please try again."
+        errGeneric: "An error occurred. Please try again.",
+        pManageTeachers: "Manage Teachers",
+        pAddTeacherTitle: "Register New Teacher",
+        tUsernameLabel: "Username / ID",
+        tPasswordLabel: "Password",
+        loginTitle: "Login",
+        loginSubtitle: "Please enter your credentials to access the portal.",
+        loginBtn: "Log In",
+        back: "Back",
+        pTeacherListTitle: "Registered Teachers",
+        successTeacherAdded: "Teacher registered successfully!",
+        errInvalidCredentials: "Invalid username or password."
     },
     si: {
         title: "EMIS ද්වාරය",
@@ -184,7 +195,18 @@ const TRANSLATIONS = {
         errInvalidScore: "ලකුණු 0 ත් 100 ත් අතර පූර්ණ සංඛ්‍යාවක් විය යුතුය.",
         errDuplicateClass: "මෙම නමින් පන්තියක් දැනටමත් පවතී.",
         errDuplicateStudent: "මෙම ඇතුළත් වීමේ අංකයෙන් ශිෂ්‍යයෙකු දැනටමත් ලියාපදිංචි කර ඇත.",
-        errGeneric: "දෝෂයක් සිදු විය. කරුණාකර නැවත උත්සාහ කරන්න."
+        errGeneric: "දෝෂයක් සිදු විය. කරුණාකර නැවත උත්සාහ කරන්න.",
+        pManageTeachers: "ගුරුවරුන් කළමනාකරණය",
+        pAddTeacherTitle: "නව ගුරුවරයෙකු ලියාපදිංචි කිරීම",
+        tUsernameLabel: "පරිශීලක නාමය / හැඳුනුම්පත",
+        tPasswordLabel: "මුරපදය",
+        loginTitle: "ඇතුල් වන්න",
+        loginSubtitle: "ද්වාරයට පිවිසීමට කරුණාකර ඔබගේ පරිශීලක නාමය සහ මුරපදය ඇතුළත් කරන්න.",
+        loginBtn: "ඇතුල් වන්න",
+        back: "ආපසු",
+        pTeacherListTitle: "ලියාපදිංචි ගුරුවරුන්",
+        successTeacherAdded: "ගුරුවරයා සාර්ථකව ලියාපදිංචි කරන ලදී!",
+        errInvalidCredentials: "වැරදි පරිශීලක නාමයක් හෝ මුරපදයක්."
     },
     ta: {
         title: "ஈ.எம்.ஐ.எஸ் தளம்",
@@ -276,7 +298,18 @@ const TRANSLATIONS = {
         errInvalidScore: "மதிப்பெண் 0 முதல் 100 வரையிலான முழு எண்ணாக இருக்க வேண்டும்.",
         errDuplicateClass: "இந்த பெயரில் ஒரு வகுப்பு ஏற்கனவே உள்ளது.",
         errDuplicateStudent: "இந்த சேர்க்கை எண்ணுடன் ஒரு மாணவர் ஏற்கனவே உள்ளார்.",
-        errGeneric: "ஒரு பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்."
+        errGeneric: "ஒரு பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.",
+        pManageTeachers: "ஆசிரியர்களை நிர்வகி",
+        pAddTeacherTitle: "புதிய ஆசிரியரை பதிவு செய்க",
+        tUsernameLabel: "பயனர் பெயர் / ஐடி",
+        tPasswordLabel: "கடவுச்சொல்",
+        loginTitle: "உள்நுழைவு",
+        loginSubtitle: "போர்ட்டலை அணுக உங்கள் சான்றுகளை உள்ளிடவும்.",
+        loginBtn: "உள்நுழைக",
+        back: "பின்னால்",
+        pTeacherListTitle: "பதிவு செய்யப்பட்ட ஆசிரியர்கள்",
+        successTeacherAdded: "ஆசிரியர் வெற்றிகரமாக பதிவு செய்யப்பட்டார்!",
+        errInvalidCredentials: "தவறான பயனர்பெயர் அல்லது கடவுச்சொல்."
     }
 };
 
@@ -284,15 +317,13 @@ const TRANSLATIONS = {
 let state = {
     currentLang: localStorage.getItem('emis_lang') || 'en',
     currentRole: null, // 'principal', 'teacher', 'student'
+    pendingRole: null, // role waiting for authentication
+    currentUser: null, // logged-in user profile
     activeTab: 'dashboard', // dependent on role
     classes: [],
     students: [],
-    teachers: [
-        { id: 't_silva', name: 'Mr. A.B. Silva', subject: 'Mathematics' },
-        { id: 't_perera', name: 'Mrs. S. Perera', subject: 'Science' },
-        { id: 't_fernando', name: 'Mr. R. Fernando', subject: 'English' }
-    ],
-    selectedTeacherId: 't_silva',
+    teachers: [],
+    selectedTeacherId: '',
     selectedClassId: '' // For Teacher Class filter
 };
 
@@ -324,6 +355,21 @@ async function initializeData() {
     
     // Fetch classes list
     await reloadClasses();
+    // Fetch teachers list
+    await reloadTeachers();
+}
+
+async function reloadTeachers() {
+    try {
+        const res = await fetch('/api/teachers');
+        if (res.ok) {
+            state.teachers = await res.json();
+            renderTeachersTable();
+            renderTeacherProfileSelection();
+        }
+    } catch (e) {
+        console.error("Failed to load teachers from D1 database:", e);
+    }
 }
 
 async function reloadClasses() {
@@ -367,6 +413,7 @@ function updateLanguage(lang) {
     if (state.currentRole === 'principal') {
         renderPrincipalStats();
         renderClassesTable();
+        renderTeachersTable();
     } else if (state.currentRole === 'teacher') {
         renderTeacherView();
     }
@@ -411,19 +458,19 @@ function registerEvents() {
 
     // Welcome Screen Role Cards
     document.getElementById("btn-role-principal").addEventListener("click", () => {
-        state.currentRole = 'principal';
-        state.activeTab = 'dashboard';
-        showScreen('principal-dashboard');
-        switchPrincipalTab('dashboard');
-        renderPrincipalStats();
+        state.pendingRole = 'principal';
+        document.getElementById("login-username-input").value = 'admin';
+        document.getElementById("login-username-input").readOnly = true;
+        document.getElementById("login-password-input").value = '';
+        showScreen('login-screen');
     });
 
     document.getElementById("btn-role-teacher").addEventListener("click", () => {
-        state.currentRole = 'teacher';
-        state.activeTab = 'dashboard';
-        showScreen('teacher-dashboard');
-        renderTeacherProfileSelection();
-        renderTeacherView();
+        state.pendingRole = 'teacher';
+        document.getElementById("login-username-input").value = '';
+        document.getElementById("login-username-input").readOnly = false;
+        document.getElementById("login-password-input").value = '';
+        showScreen('login-screen');
     });
 
     document.getElementById("btn-role-student").addEventListener("click", () => {
@@ -432,10 +479,20 @@ function registerEvents() {
         resetStudentPortal();
     });
 
+    // Login Submission
+    document.getElementById("login-form").addEventListener("submit", handleLoginSubmit);
+
+    // Login Back Button
+    document.getElementById("login-back-btn").addEventListener("click", () => {
+        state.pendingRole = null;
+        showScreen('welcome-screen');
+    });
+
     // Logouts
     document.querySelectorAll(".logout-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             state.currentRole = null;
+            state.currentUser = null;
             showScreen('welcome-screen');
         });
     });
@@ -444,9 +501,11 @@ function registerEvents() {
     document.getElementById("p-nav-dash").addEventListener("click", () => switchPrincipalTab('dashboard'));
     document.getElementById("p-nav-classes").addEventListener("click", () => switchPrincipalTab('classes'));
     document.getElementById("p-nav-students").addEventListener("click", () => switchPrincipalTab('students'));
+    document.getElementById("p-nav-teachers").addEventListener("click", () => switchPrincipalTab('teachers'));
 
     // Principal Form Submit
     document.getElementById("add-class-form").addEventListener("submit", handleAddClass);
+    document.getElementById("add-teacher-form").addEventListener("submit", handleAddTeacher);
 
     // Teacher Tab Navigation
     document.getElementById("t-tab-overview").addEventListener("click", () => switchTeacherTab('overview'));
@@ -478,18 +537,22 @@ function switchPrincipalTab(tab) {
     document.getElementById("p-nav-dash").classList.toggle("active", tab === 'dashboard');
     document.getElementById("p-nav-classes").classList.toggle("active", tab === 'classes');
     document.getElementById("p-nav-students").classList.toggle("active", tab === 'students');
-
+    document.getElementById("p-nav-teachers").classList.toggle("active", tab === 'teachers');
+ 
     // Show content container
     document.getElementById("p-content-dash").classList.toggle("hidden", tab !== 'dashboard');
     document.getElementById("p-content-classes").classList.toggle("hidden", tab !== 'classes');
     document.getElementById("p-content-students").classList.toggle("hidden", tab !== 'students');
-
+    document.getElementById("p-content-teachers").classList.toggle("hidden", tab !== 'teachers');
+ 
     if (tab === 'dashboard') {
         renderPrincipalStats();
     } else if (tab === 'classes') {
         renderClassesTable();
     } else if (tab === 'students') {
         renderPrincipalAllStudents();
+    } else if (tab === 'teachers') {
+        renderTeachersTable();
     }
 }
 
@@ -557,6 +620,104 @@ async function handleAddClass(e) {
     }
 }
 
+async function handleLoginSubmit(e) {
+    e.preventDefault();
+    const usernameInput = document.getElementById("login-username-input");
+    const passwordInput = document.getElementById("login-password-input");
+    
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    const role = state.pendingRole;
+
+    if (!username || !password) {
+        showAlert(t('errEmpty'), 'error');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role, username, password })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            state.currentRole = role;
+            state.currentUser = data.user;
+            
+            if (role === 'principal') {
+                showScreen('principal-dashboard');
+                switchPrincipalTab('dashboard');
+                renderPrincipalStats();
+            } else if (role === 'teacher') {
+                state.selectedTeacherId = data.user.username;
+                showScreen('teacher-dashboard');
+                
+                // Set teacher current subject in DOM badge
+                const subjectBadge = document.getElementById("teacher-current-subject");
+                if (subjectBadge) {
+                    subjectBadge.textContent = t('t' + data.user.subject) || data.user.subject;
+                }
+                
+                // Auto-fill subject select in Enter Marks form
+                const subjectSelect = document.getElementById("mark-subject-select");
+                if (subjectSelect) {
+                    subjectSelect.value = data.user.subject;
+                }
+                switchTeacherTab('overview');
+                renderTeacherView();
+            }
+            usernameInput.value = '';
+            passwordInput.value = '';
+            state.pendingRole = null;
+        } else {
+            showAlert(t('errInvalidCredentials'), 'error');
+        }
+    } catch (err) {
+        showAlert(t('errGeneric'), 'error');
+    }
+}
+
+async function handleAddTeacher(e) {
+    e.preventDefault();
+    const usernameInput = document.getElementById("teacher-username-input");
+    const nameInput = document.getElementById("teacher-name-input");
+    const subjectSelect = document.getElementById("teacher-subject-input");
+    const passwordInput = document.getElementById("teacher-password-input");
+
+    const username = usernameInput.value.trim().toLowerCase();
+    const name = nameInput.value.trim();
+    const subject = subjectSelect.value;
+    const password = passwordInput.value.trim();
+
+    if (!username || !name || !subject || !password) {
+        showAlert(t('errEmpty'), 'error');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/teachers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, name, subject, password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            showAlert(t('successTeacherAdded'), 'success');
+            usernameInput.value = '';
+            nameInput.value = '';
+            passwordInput.value = '';
+            await reloadTeachers();
+        } else {
+            showAlert(t(data.error) || t('errGeneric'), 'error');
+        }
+    } catch (err) {
+        showAlert(t('errGeneric'), 'error');
+    }
+}
+ 
 function renderClassesTable() {
     const tbody = document.getElementById("classes-table-body");
     tbody.innerHTML = '';
@@ -571,6 +732,26 @@ function renderClassesTable() {
         row.innerHTML = `
             <td><code>${c.id}</code></td>
             <td><strong>${c.name}</strong></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function renderTeachersTable() {
+    const tbody = document.getElementById("p-teachers-table-body");
+    tbody.innerHTML = '';
+
+    if (state.teachers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align: center;">${t('loading')}</td></tr>`;
+        return;
+    }
+
+    state.teachers.forEach(t => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td><code>${t.id}</code></td>
+            <td><strong>${t.name}</strong></td>
+            <td><span class="role-badge" style="background: hsl(38, 95%, 95%); color: var(--secondary); border-color: rgba(255, 190, 0, 0.25);">${t.subject}</span></td>
         `;
         tbody.appendChild(row);
     });
@@ -611,25 +792,16 @@ function renderTeacherProfileSelection() {
     const container = document.getElementById("teacher-profiles");
     container.innerHTML = '';
     
-    state.teachers.forEach(teacher => {
+    const loggedInTeacher = state.teachers.find(t => t.id === state.selectedTeacherId);
+    if (loggedInTeacher) {
         const card = document.createElement("div");
-        card.className = `teacher-profile-card ${state.selectedTeacherId === teacher.id ? 'selected' : ''}`;
+        card.className = `teacher-profile-card selected`;
         card.innerHTML = `
-            <div class="teacher-name">${teacher.name}</div>
-            <div class="teacher-subject">${t('tSelectSubject')}: ${teacher.subject}</div>
+            <div class="teacher-name">${loggedInTeacher.name}</div>
+            <div class="teacher-subject">${t('tSelectSubject')}: ${loggedInTeacher.subject}</div>
         `;
-        card.addEventListener("click", () => {
-            state.selectedTeacherId = teacher.id;
-            document.querySelectorAll(".teacher-profile-card").forEach(c => c.classList.remove("selected"));
-            card.classList.add("selected");
-            // Auto fill subject select in Marks form
-            const subjectSelect = document.getElementById("mark-subject-select");
-            if (subjectSelect) {
-                subjectSelect.value = teacher.subject;
-            }
-        });
         container.appendChild(card);
-    });
+    }
 }
 
 function switchTeacherTab(tab) {
