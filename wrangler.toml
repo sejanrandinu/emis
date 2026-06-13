@@ -4,7 +4,7 @@ name = "emis-school-management"
 compatibility_date = "2026-06-13"
 
 [assets]
-directory = "."
+directory = "./public"
 
 [[d1_databases]]
 binding = "DB"

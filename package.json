@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "School Management System on Cloudflare Pages and D1",
   "scripts": {
-    "dev": "npx wrangler pages dev .",
-    "deploy": "npx wrangler pages deploy ."
+    "dev": "npx wrangler pages dev ./public",
+    "deploy": "npx wrangler pages deploy ./public"
   },
   "devDependencies": {
     "wrangler": "^4.100.0"
