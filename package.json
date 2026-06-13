@@ -1,0 +1,12 @@
+{
+  "name": "emis-school-management",
+  "version": "1.0.0",
+  "description": "School Management System on Cloudflare Pages and D1",
+  "scripts": {
+    "dev": "wrangler pages dev .",
+    "deploy": "wrangler pages deploy ."
+  },
+  "devDependencies": {
+    "wrangler": "^4.100.0"
+  }
+}
