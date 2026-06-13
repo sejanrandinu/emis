@@ -1,0 +1,10 @@
+# Cloudflare Pages Wrangler Configuration
+
+name = "emis-school-management"
+compatibility_date = "2026-06-13"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "school-db"
+database_id = "d1-database-placeholder"

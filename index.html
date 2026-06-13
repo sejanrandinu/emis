@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMIS - School Management System</title>
+    <meta name="description" content="A comprehensive three-language School Management System for Principals, Teachers, and Students.">
+    <!-- Link Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Defer Scripts loading -->
+    <script src="app.js" defer></script>
+</head>
+<body>
+
+    <!-- Sri Lankan flag color indicator strip -->
+    <div class="sl-indicator"></div>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="header-container">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z M5.89 12.5L12 15.83l6.11-3.33c.59.32.89.74.89 1.25 0 .83-.82 1.5-2.5 1.5s-2.5-.67-2.5-1.5c0-.51.3-1 .89-1.25l-2.89-1.58L5.89 12.5z"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1 data-i18n="title">EMIS Portal</h1>
+                    <p data-i18n="subtitle">Education Management Information System</p>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <!-- i18n Language Toggle Buttons -->
+                <div class="lang-selector">
+                    <button class="lang-btn active" data-lang="en">English</button>
+                    <button class="lang-btn" data-lang="si">සිංහල</button>
+                    <button class="lang-btn" data-lang="ta">தமிழ்</button>
+                </div>
+                <!-- Role indicator tag -->
+                <div id="header-role-badge" class="role-badge hidden">Principal View</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main>
+        <div class="view-card">
+
+            <!-- 1. WELCOME SCREEN (ROLE SELECTOR) -->
+            <div id="welcome-screen" class="app-screen welcome-screen">
+                <h2 class="welcome-title" data-i18n="welcomeTitle">School Management System</h2>
+                <p class="welcome-subtitle" data-i18n="welcomeSubtitle">Select your role below to manage classes, students, marks, discipline, or view academic report cards.</p>
+                
+                <div class="role-grid">
+                    <!-- Principal Role -->
+                    <div id="btn-role-principal" class="role-card principal-card">
+                        <div class="role-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="role-name" data-i18n="rolePrincipal">Principal / Admin</h3>
+                        <p class="role-description" data-i18n="descPrincipal">Create classes, register teachers, and view overall school analytics.</p>
+                    </div>
+
+                    <!-- Teacher Role -->
+                    <div id="btn-role-teacher" class="role-card teacher-card">
+                        <div class="role-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
+                            </svg>
+                        </div>
+                        <h3 class="role-name" data-i18n="roleTeacher">Teacher Portal</h3>
+                        <p class="role-description" data-i18n="descTeacher">Add new students, enter test marks, and record student conduct logs.</p>
+                    </div>
+
+                    <!-- Student Role -->
+                    <div id="btn-role-student" class="role-card student-card">
+                        <div class="role-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                        </div>
+                        <h3 class="role-name" data-i18n="roleStudent">Student Search</h3>
+                        <p class="role-description" data-i18n="descStudent">View report cards, grades, term averages, and discipline history.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. PRINCIPAL / ADMIN DASHBOARD -->
+            <div id="principal-dashboard" class="app-screen dashboard-layout hidden">
+                <div class="dashboard-sidebar">
+                    <div class="sidebar-menu">
+                        <button id="p-nav-dash" class="sidebar-btn active">
+                            <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                            <span data-i18n="pDashboard">Dashboard</span>
+                        </button>
+                        <button id="p-nav-classes" class="sidebar-btn">
+                            <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+                            <span data-i18n="pClasses">Manage Classes</span>
+                        </button>
+                        <button id="p-nav-students" class="sidebar-btn">
+                            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-3.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V20h6v-3.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                            <span data-i18n="pAllStudents">All Students</span>
+                        </button>
+                    </div>
+                    <button class="sidebar-btn logout-btn">
+                        <svg viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+                        <span data-i18n="logout">Switch Role</span>
+                    </button>
+                </div>
+
+                <div class="dashboard-content">
+                    <!-- Principal sub-page 1: Dashboard Stats Overview -->
+                    <div id="p-content-dash">
+                        <div class="content-header">
+                            <div class="content-title">
+                                <h2 data-i18n="pStats">School Statistics</h2>
+                            </div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card students-stat">
+                                <div class="stat-icon">
+                                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                </div>
+                                <div class="stat-info">
+                                    <div id="stat-students-count" class="stat-num">0</div>
+                                    <div class="stat-label" data-i18n="pTotalStudents">Total Students</div>
+                                </div>
+                            </div>
+                            <div class="stat-card classes-stat">
+                                <div class="stat-icon">
+                                    <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+                                </div>
+                                <div class="stat-info">
+                                    <div id="stat-classes-count" class="stat-num">0</div>
+                                    <div class="stat-label" data-i18n="pTotalClasses">Total Classes</div>
+                                </div>
+                            </div>
+                            <div class="stat-card discipline-stat">
+                                <div class="stat-icon">
+                                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                                </div>
+                                <div class="stat-info">
+                                    <div id="stat-discipline-count" class="stat-num">0</div>
+                                    <div class="stat-label" data-i18n="pDisciplineLogs">Discipline Logs</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Principal sub-page 2: Add Classes -->
+                    <div id="p-content-classes" class="hidden">
+                        <div class="content-header">
+                            <div class="content-title">
+                                <h2 data-i18n="pClasses">Manage Classes</h2>
+                            </div>
+                        </div>
+                        <div class="form-container">
+                            <h3 style="margin-bottom: 1.25rem;" data-i18n="pAddClassTitle">Add New Class</h3>
+                            <form id="add-class-form">
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label for="class-name-input" data-i18n="pClassNameLabel">Class Name</label>
+                                    <input type="text" id="class-name-input" class="form-control" placeholder="Class Name" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary" data-i18n="submit">Submit Record</button>
+                            </form>
+                        </div>
+                        <div style="margin-top: 3rem;">
+                            <h3 data-i18n="pClassListTitle">Existing Classes</h3>
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th data-i18n="pClassId">Class ID</th>
+                                            <th data-i18n="pClassName">Class Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="classes-table-body">
+                                        <!-- Dynamic Classes table list -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Principal sub-page 3: All Students -->
+                    <div id="p-content-students" class="hidden">
+                        <div class="content-header">
+                            <div class="content-title">
+                                <h2 data-i18n="pAllStudents">All Students</h2>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="tAdmissionNo">Admission Number</th>
+                                        <th data-i18n="tFullName">Full Name</th>
+                                        <th data-i18n="tSelectClass">Select Class</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="p-students-table-body">
+                                    <!-- List of students in all classes -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 3. TEACHER DASHBOARD PORTAL -->
+            <div id="teacher-dashboard" class="app-screen dashboard-layout hidden">
+                <div class="dashboard-sidebar">
+                    <div class="sidebar-menu">
+                        <button id="t-tab-overview" class="sidebar-btn active">
+                            <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                            <span data-i18n="tDashboard">Overview</span>
+                        </button>
+                        <button id="t-tab-student" class="sidebar-btn">
+                            <svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                            <span data-i18n="tAddStudent">Add Student</span>
+                        </button>
+                        <button id="t-tab-marks" class="sidebar-btn">
+                            <svg viewBox="0 0 24 24"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>
+                            <span data-i18n="tEnterMarks">Enter Marks</span>
+                        </button>
+                        <button id="t-tab-discipline" class="sidebar-btn">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                            <span data-i18n="tLogDiscipline">Record Discipline</span>
+                        </button>
+                    </div>
+                    <button class="sidebar-btn logout-btn">
+                        <svg viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+                        <span data-i18n="logout">Switch Role</span>
+                    </button>
+                </div>
+
+                <div class="dashboard-content">
+                    
+                    <!-- Class Filter bar at top of Teacher View -->
+                    <div style="background: white; border: 1px solid rgba(226, 232, 240, 0.8); padding: 1.25rem 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <label for="teacher-class-select" style="font-weight: 700; font-size: 0.9rem;" data-i18n="tSelectClass">Select Class</label>
+                            <select id="teacher-class-select" class="form-control" style="width: 200px; padding: 0.5rem 0.75rem;">
+                                <!-- Dynamic options loaded from classes -->
+                            </select>
+                        </div>
+                        <div class="role-badge" id="teacher-current-subject" style="background: hsl(38, 95%, 95%); color: var(--secondary); border-color: rgba(255, 190, 0, 0.25);">
+                            Mathematics
+                        </div>
+                    </div>
+
+                    <!-- Teacher sub-page 1: Overview and Students List -->
+                    <div id="t-content-overview">
+                        <h3 style="margin-bottom: 1rem;" data-i18n="tSelectProfile">Select Teacher Profile</h3>
+                        <div id="teacher-profiles" class="teacher-profile-list">
+                            <!-- Dynamic profiles rendered -->
+                        </div>
+                        
+                        <div style="margin-top: 3rem;">
+                            <h3 data-i18n="tStudentListTitle">Students in your selected class</h3>
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th data-i18n="tAdmissionNo">Admission Number</th>
+                                            <th data-i18n="tFullName">Full Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="teacher-students-tbody">
+                                        <!-- Dynamic student list filter -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teacher sub-page 2: Add Student -->
+                    <div id="t-content-student" class="hidden">
+                        <div class="form-container">
+                            <h3 style="margin-bottom: 1.5rem;" data-i18n="tAddStudentTitle">Register New Student</h3>
+                            <form id="add-student-form">
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label for="student-admission-input" data-i18n="tAdmissionNo">Admission Number</label>
+                                    <input type="text" id="student-admission-input" class="form-control" placeholder="1001" required>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label for="student-name-input" data-i18n="tFullName">Full Name</label>
+                                    <input type="text" id="student-name-input" class="form-control" placeholder="Nimal Silva" required>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1.5rem;">
+                                    <label for="student-class-select" data-i18n="tSelectClass">Select Class</label>
+                                    <select id="student-class-select" class="form-control" required>
+                                        <!-- Classes list load -->
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary" data-i18n="submit">Submit Record</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Teacher sub-page 3: Enter Marks -->
+                    <div id="t-content-marks" class="hidden">
+                        <div class="form-container">
+                            <h3 style="margin-bottom: 1.5rem;" data-i18n="tEnterMarksTitle">Enter Academic Marks</h3>
+                            <form id="add-marks-form">
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label for="mark-student-select" data-i18n="roleStudent">Student</label>
+                                    <select id="mark-student-select" class="form-control" required>
+                                        <option value="">-- Select Student --</option>
+                                    </select>
+                                </div>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="mark-term-select" data-i18n="tSelectTerm">Select Term</label>
+                                        <select id="mark-term-select" class="form-control" required>
+                                            <option value="Term 1" data-i18n="tTerm1">Term 1</option>
+                                            <option value="Term 2" data-i18n="tTerm2">Term 2</option>
+                                            <option value="Term 3" data-i18n="tTerm3">Term 3</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="mark-subject-select" data-i18n="tSelectSubject">Select Subject</label>
+                                        <select id="mark-subject-select" class="form-control" required>
+                                            <option value="Mathematics" data-i18n="tMaths">Mathematics</option>
+                                            <option value="Science" data-i18n="tScience">Science</option>
+                                            <option value="English" data-i18n="tEnglish">English</option>
+                                            <option value="History" data-i18n="tHistory">History</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1.5rem;">
+                                    <label for="mark-score-input" data-i18n="tScoreLabel">Score (0 - 100)</label>
+                                    <input type="number" id="mark-score-input" class="form-control" min="0" max="100" placeholder="85" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary" data-i18n="submit">Submit Record</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Teacher sub-page 4: Record Discipline -->
+                    <div id="t-content-discipline" class="hidden">
+                        <div class="form-container">
+                            <h3 style="margin-bottom: 1.5rem;" data-i18n="tLogDisciplineTitle">Record Discipline / Merit Log</h3>
+                            <form id="add-discipline-form">
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label for="disc-student-select" data-i18n="roleStudent">Student</label>
+                                    <select id="disc-student-select" class="form-control" required>
+                                        <option value="">-- Select Student --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label for="disc-category-select" data-i18n="tCategory">Category</label>
+                                    <select id="disc-category-select" class="form-control" required>
+                                        <option value="Merit" data-i18n="tCategoryMerit">Merit / Good Conduct</option>
+                                        <option value="Warning" data-i18n="tCategoryWarning">Warning / Misconduct</option>
+                                        <option value="Late Attendance" data-i18n="tCategoryLate">Late Attendance</option>
+                                        <option value="Uniform" data-i18n="tCategoryUniform">Uniform Issue</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label for="disc-desc-input" data-i18n="tDescription">Incident Description</label>
+                                    <textarea id="disc-desc-input" class="form-control" rows="3" required></textarea>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1.5rem;">
+                                    <label for="disc-action-input" data-i18n="tActionTaken">Action Taken</label>
+                                    <input type="text" id="disc-action-input" class="form-control" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary" data-i18n="submit">Submit Record</button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 4. STUDENT PORTAL (RESULTS LOOKUP) -->
+            <div id="student-portal" class="app-screen student-portal-wrapper hidden">
+                <div id="student-portal-search-box" class="student-portal-card">
+                    <div class="portal-header">
+                        <h2 data-i18n="sPortalTitle">Student Report Portal</h2>
+                        <p data-i18n="sPortalSubtitle">Enter your admission details below to check your term report card & conduct timeline.</p>
+                    </div>
+                    
+                    <form id="student-search-form">
+                        <div class="search-grid">
+                            <div class="form-group">
+                                <label for="search-class-select" data-i18n="tSelectClass">Select Class</label>
+                                <select id="search-class-select" class="form-control" required>
+                                    <option value="">-- Select Class --</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="search-admission-input" data-i18n="tAdmissionNo">Admission Number</label>
+                                <input type="text" id="search-admission-input" class="form-control" placeholder="1001" required>
+                            </div>
+                        </div>
+                        <div class="search-btn-wrapper">
+                            <button type="submit" class="btn btn-primary search-btn" data-i18n="sSearchBtn">View Report</button>
+                        </div>
+                    </form>
+                    
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-secondary logout-btn" data-i18n="logout">Switch Role</button>
+                    </div>
+                </div>
+
+                <!-- Search Results rendering -->
+                <div id="student-results-wrapper" class="hidden">
+                    
+                    <!-- Student Profile Banner -->
+                    <div class="student-profile-header">
+                        <div class="profile-info">
+                            <h3 id="res-student-name">Nimal Silva</h3>
+                            <p id="res-student-class">Grade 10-A</p>
+                        </div>
+                        <div class="profile-admission">
+                            <span>ADM No: </span><span id="res-student-admission">1001</span>
+                        </div>
+                    </div>
+
+                    <!-- Academic Marks / Performance Sheet -->
+                    <div>
+                        <div class="results-section-title">
+                            <svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>
+                            <span data-i18n="sReportTitle">Academic Performance Card</span>
+                        </div>
+                        <div id="term-reports-container" class="term-results-container">
+                            <!-- Dynamic term-wise report groups will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Discipline Records Timeline -->
+                    <div style="margin-top: 4rem;">
+                        <div class="results-section-title">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                            <span data-i18n="sDisciplineTitle">Conduct & Discipline Timeline</span>
+                        </div>
+                        <div id="discipline-timeline" class="discipline-timeline">
+                            <!-- Dynamic discipline cards timeline rendered here -->
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 4rem;">
+                        <button class="btn btn-primary" onclick="resetStudentPortal()" data-i18n="logout">Switch Role</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Floating Global Alert Notifications banner -->
+    <div id="alert-notification" class="alert-banner">
+        <span>Operation complete</span>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div data-i18n="subtitle">Education Management Information System</div>
+        <div style="margin-top: 0.5rem; font-size: 0.75rem;">© 2026 EMIS Sri Lanka. All Rights Reserved.</div>
+    </footer>
+
+</body>
+</html>
