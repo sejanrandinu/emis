@@ -1,6 +1,6 @@
 # Cloudflare Pages Wrangler Configuration
 
-name = "emis-school-management"
+name = "emis"
 compatibility_date = "2026-06-13"
 
 [assets]
