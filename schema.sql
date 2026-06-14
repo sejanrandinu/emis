@@ -3,7 +3,9 @@
 -- 1. Classes Table
 CREATE TABLE IF NOT EXISTS classes (
     id TEXT PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    classTeacherId TEXT,
+    FOREIGN KEY (classTeacherId) REFERENCES teachers(id)
 );
 
 -- 2. Teachers Table

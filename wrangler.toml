@@ -2,11 +2,9 @@
 
 name = "emis-school-management"
 compatibility_date = "2026-06-13"
-
-[assets]
-directory = "./public"
+pages_build_output_dir = "./public"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "school-db"
-database_id = "d1-database-placeholder"
+database_id = "4219b2b6-29c7-4338-92f1-8153e15f4790"

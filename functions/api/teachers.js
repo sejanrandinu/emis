@@ -1,4 +1,4 @@
-// Cloudflare Pages D1 API for Teacher Registration & Listing
+// Cloudflare Pages D1 API for Teacher Registration, Listing & Deletion
 
 async function hashPassword(password) {
     const encoder = new TextEncoder();
@@ -78,11 +78,50 @@ export async function onRequest(context) {
                 "INSERT INTO teachers (id, name, subject, passwordHash) VALUES (?, ?, ?, ?)"
             ).bind(cleanUsername, cleanName, cleanSubject, hashed).run();
 
-            return new Response(JSON.stringify({ 
-                success: true, 
-                teacher: { id: cleanUsername, name: cleanName, subject: cleanSubject } 
+            return new Response(JSON.stringify({
+                success: true,
+                teacher: { id: cleanUsername, name: cleanName, subject: cleanSubject }
             }), {
                 status: 201,
+                headers: { "Content-Type": "application/json" }
+            });
+
+        } catch (err) {
+            return new Response(JSON.stringify({ error: err.message }), {
+                status: 500,
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+    }
+
+    // Handle DELETE - Principal removes a teacher
+    if (request.method === "DELETE") {
+        try {
+            const teacherId = url.searchParams.get("id");
+
+            if (!teacherId || !teacherId.trim()) {
+                return new Response(JSON.stringify({ error: "teacher_id_missing" }), {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            // Check if teacher exists
+            const existing = await db.prepare("SELECT id FROM teachers WHERE id = ?").bind(teacherId.trim()).first();
+            if (!existing) {
+                return new Response(JSON.stringify({ error: "teacher_not_found" }), {
+                    status: 404,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            // Remove class teacher assignment from any classes this teacher was assigned to
+            await db.prepare("UPDATE classes SET classTeacherId = NULL WHERE classTeacherId = ?").bind(teacherId.trim()).run();
+
+            // Delete the teacher
+            await db.prepare("DELETE FROM teachers WHERE id = ?").bind(teacherId.trim()).run();
+
+            return new Response(JSON.stringify({ success: true }), {
                 headers: { "Content-Type": "application/json" }
             });
 

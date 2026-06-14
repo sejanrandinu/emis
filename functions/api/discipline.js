@@ -1,4 +1,4 @@
-// Cloudflare Pages D1 API for Discipline Records
+// Cloudflare Pages D1 API for Discipline Records — CRUD
 
 export async function onRequest(context) {
     const { request, env } = context;
@@ -13,23 +13,41 @@ export async function onRequest(context) {
 
     const url = new URL(request.url);
     const admissionNo = url.searchParams.get("admissionNo");
+    const classId = url.searchParams.get("classId");
 
-    // Handle GET - Retrieve discipline records for a student
+    // Handle GET - Retrieve discipline records
     if (request.method === "GET") {
-        if (!admissionNo) {
-            return new Response(JSON.stringify({ error: "admission_number_missing" }), {
-                status: 400,
-                headers: { "Content-Type": "application/json" }
-            });
-        }
-
         try {
-            const { results } = await db.prepare(
-                "SELECT * FROM discipline WHERE admissionNo = ? ORDER BY date DESC"
-            ).bind(admissionNo.trim()).all();
-            return new Response(JSON.stringify(results), {
+            // GET /api/discipline?admissionNo=X — records for one student
+            if (admissionNo) {
+                const { results } = await db.prepare(
+                    "SELECT * FROM discipline WHERE admissionNo = ? ORDER BY date DESC"
+                ).bind(admissionNo.trim()).all();
+                return new Response(JSON.stringify(results), {
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            // GET /api/discipline?classId=X — all records for students in a class
+            if (classId) {
+                const { results } = await db.prepare(
+                    `SELECT d.*, s.name as studentName
+                     FROM discipline d
+                     JOIN students s ON d.admissionNo = s.admissionNo
+                     WHERE s.classId = ?
+                     ORDER BY d.date DESC`
+                ).bind(classId.trim()).all();
+                return new Response(JSON.stringify(results), {
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            // GET /api/discipline — total count only (for principal stats dashboard)
+            const row = await db.prepare("SELECT COUNT(*) as count FROM discipline").first();
+            return new Response(JSON.stringify({ count: row ? row.count : 0 }), {
                 headers: { "Content-Type": "application/json" }
             });
+
         } catch (err) {
             return new Response(JSON.stringify({ error: err.message }), {
                 status: 500,
@@ -69,15 +87,50 @@ export async function onRequest(context) {
             const date = new Date().toISOString().split('T')[0];
 
             await db.prepare(
-                `INSERT INTO discipline (id, admissionNo, category, description, action, date) 
+                `INSERT INTO discipline (id, admissionNo, category, description, action, date)
                  VALUES (?, ?, ?, ?, ?, ?)`
             ).bind(id, cleanNo, cleanCategory, cleanDescription, cleanAction, date).run();
 
-            return new Response(JSON.stringify({ 
-                success: true, 
-                record: { id, admissionNo: cleanNo, category: cleanCategory, description: cleanDescription, action: cleanAction, date } 
+            return new Response(JSON.stringify({
+                success: true,
+                record: { id, admissionNo: cleanNo, category: cleanCategory, description: cleanDescription, action: cleanAction, date }
             }), {
                 status: 201,
+                headers: { "Content-Type": "application/json" }
+            });
+
+        } catch (err) {
+            return new Response(JSON.stringify({ error: err.message }), {
+                status: 500,
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+    }
+
+    // Handle DELETE - Remove a discipline record by ID
+    if (request.method === "DELETE") {
+        try {
+            const recordId = url.searchParams.get("id");
+
+            if (!recordId || !recordId.trim()) {
+                return new Response(JSON.stringify({ error: "record_id_missing" }), {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            // Check if record exists
+            const existing = await db.prepare("SELECT id FROM discipline WHERE id = ?").bind(recordId.trim()).first();
+            if (!existing) {
+                return new Response(JSON.stringify({ error: "record_not_found" }), {
+                    status: 404,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            await db.prepare("DELETE FROM discipline WHERE id = ?").bind(recordId.trim()).run();
+
+            return new Response(JSON.stringify({ success: true }), {
                 headers: { "Content-Type": "application/json" }
             });
 

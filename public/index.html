@@ -203,6 +203,7 @@
                                         <tr>
                                             <th data-i18n="pClassId">Class ID</th>
                                             <th data-i18n="pClassName">Class Name</th>
+                                            <th data-i18n="pClassTeacher">Class Teacher</th>
                                         </tr>
                                     </thead>
                                     <tbody id="classes-table-body">
@@ -226,7 +227,8 @@
                                     <tr>
                                         <th data-i18n="tAdmissionNo">Admission Number</th>
                                         <th data-i18n="tFullName">Full Name</th>
-                                        <th data-i18n="tSelectClass">Select Class</th>
+                                        <th data-i18n="pClassName">Class</th>
+                                        <th data-i18n="pActions">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="p-students-table-body">
@@ -283,6 +285,7 @@
                                             <th data-i18n="tUsernameLabel">Username</th>
                                             <th data-i18n="tFullName">Full Name</th>
                                             <th data-i18n="tSelectSubject">Subject</th>
+                                            <th data-i18n="pActions">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="p-teachers-table-body">
@@ -353,6 +356,7 @@
                                         <tr>
                                             <th data-i18n="tAdmissionNo">Admission Number</th>
                                             <th data-i18n="tFullName">Full Name</th>
+                                            <th data-i18n="pActions">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="teacher-students-tbody">
@@ -457,6 +461,27 @@
                                 <button type="submit" class="btn btn-primary" data-i18n="submit">Submit Record</button>
                             </form>
                         </div>
+
+                        <!-- Discipline Records for Selected Class -->
+                        <div style="margin-top: 3rem;">
+                            <h3 data-i18n="tDisciplineRecords">Class Discipline Records</h3>
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th data-i18n="roleStudent">Student</th>
+                                            <th data-i18n="tCategory">Category</th>
+                                            <th data-i18n="sDate">Date</th>
+                                            <th data-i18n="tDescription">Description</th>
+                                            <th data-i18n="pActions">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="t-discipline-tbody">
+                                        <!-- Dynamic: Discipline records for selected class -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -505,6 +530,11 @@
                         <div class="profile-admission">
                             <span>ADM No: </span><span id="res-student-admission">1001</span>
                         </div>
+                    </div>
+
+                    <!-- Student Class Rank Display -->
+                    <div id="student-rank-section" style="margin: 1.5rem 0 0 0;">
+                        <div id="rank-display-container"></div>
                     </div>
 
                     <!-- Academic Marks / Performance Sheet -->

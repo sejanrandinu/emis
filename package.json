@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "School Management System on Cloudflare Pages and D1",
   "scripts": {
-    "dev": "npx wrangler pages dev ./public",
-    "deploy": "npx wrangler pages deploy ./public"
+    "dev": "npx wrangler pages dev ./public --compatibility-date=2026-06-13",
+    "deploy": "npx wrangler pages deploy ./public --project-name=emis"
   },
   "devDependencies": {
     "wrangler": "^4.100.0"
